@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org/">
+<head th:replace="fragments :: head"></head>
+<body class="container  body-content">
+<h1>Add Course</h1>
+
+<nav th:replace="fragments :: page-header"></nav>
+
+<form method="post" style="max-width:600px;" modelAttribute="prerequisites">
+
+    <div class="form-group">
+        <label th:for="name">Course Code and Number</label>
+        <input class="form-control" th:field="${course.name}" />
+        <span th:errors="${course.name}" class="error"></span>
+    </div>
+
+    <div class="form-group">
+        <label th:for="title">Course Title</label>
+        <input class="form-control" th:field="${course.title}" />
+        <span th:errors="${course.name}" class="error"></span>
+    </div>
+
+    <div class="form-group">
+        <label th:for="creditHrs">Credit Hours</label>
+        <input class="form-control" th:field="${course.creditHrs}" />
+        <span th:errors="${course.creditHrs}" class="error"></span>
+    </div>
+
+    <div class="form-group">
+        <label th:for="prerequisites">Prerequisites</label>
+            <th:block th:each="course : ${university.getCourses()}">
+                <input type="checkbox" name="prerequisites" th:value="${course.id}">
+                <label th:for="course" th:text="${course.name}"></label>
+            </th:block>
+    </div>
+
+    <input type="submit" value="Add Course" />
+</form>
+
+</body>
+</html>

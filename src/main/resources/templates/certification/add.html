@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org/">
+<head th:replace="fragments :: head"></head>
+<body class="container  body-content">
+<h1>Add Certification</h1>
+
+<nav th:replace="fragments :: page-header"></nav>
+
+<form method="post" style="max-width:600px;">
+
+    <div class="form-group">
+        <label th:for="name">Certification Name</label>
+        <input class="form-control" th:field="${certification.name}" />
+        <span th:errors="${certification.name}" class="error"></span>
+    </div>
+
+    <div class="form-group">
+        <label th:for="requiredCourses">Required Courses</label>
+        <th:block th:each="course : ${university.getCourses()}">
+            <input type="checkbox" name="requiredCourses" th:value="${course.id}">
+            <label th:for="course" th:text="${course.name}"></label>
+        </th:block>
+    </div>
+
+    <input type="submit" value="Add Certification" />
+</form>
+
+</body>
+</html>

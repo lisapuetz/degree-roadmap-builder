@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org/">
+<head th:replace="fragments :: head"></head>
+<body class="container  body-content">
+<h1>Add program for University</h1>
+
+<nav th:replace="fragments :: page-header"></nav>
+
+    <form method="post" style="max-width:600px;" modelAttribute="program">
+
+        <div class="form-group">
+            <label th:for="name">Program Name</label>
+            <input class="form-control" th:field="${program.name}" />
+            <span th:errors="${program.name}" class="error"></span>
+        </div>
+
+        <div class="form-group">
+            <label th:for="category">Program Category</label>
+            <input class="form-control" th:field="${program.category}" />
+            <span th:errors="${program.category}" class="error"></span>
+        </div>
+
+        <input type="submit" value="Add Program" />
+    </form>
+
+</body>
+</html>

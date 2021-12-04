@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org/">
+<head th:replace="fragments :: head"></head>
+<body class="container body-content">
+
+<nav th:replace="fragments :: page-header"></nav>
+
+<h1>Your Map</h1>
+<h3 class="map-details-subhead" th:each="certification : ${chosenCertifications}" th:text="${certification.getName()} in ${certification.getProgram().getName()}">
+
+    <div th:each="semester : ${userMap}">
+        <h2 class="semester-heading" th:text="Semester"></h2>
+            <div th:each="course : semester">
+                <p class="course-listing" th:text="${course.name} ${course.title} ${course.creditHrs} credit hours"></p>
+            </div>
+    </div>
+</body>
+</html>

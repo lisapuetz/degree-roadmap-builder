@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org/">
+<head th:replace="fragments :: head"></head>
+    <body>
+
+    <div th:replace="fragments :: page-header"></div>
+
+    <th:block th:each="university : ${universities}">
+        <h2 class="semester-heading" th:text="${university.name}"></h2>
+        <th:block th:each="program : ${university.programs}">
+            <h3 class="program-heading" th:text="${program.name}"></h3>
+            <th:block th:each="certification : ${program.certifications}">
+                <p class="course-listing" th:text="${certification.name}"> </p>
+            </th:block>
+        </th:block>
+    </th:block>
+
+    </div>
+
+    </body>
+</html>
