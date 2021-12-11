@@ -2,13 +2,12 @@ package com.lisapuetz.degreeroadmapbuilder.controllers;
 
 import com.lisapuetz.degreeroadmapbuilder.models.*;
 import com.lisapuetz.degreeroadmapbuilder.models.data.CertificationRepository;
+import com.lisapuetz.degreeroadmapbuilder.models.data.CourseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.lang.reflect.Array;
 import java.util.*;
 
@@ -18,13 +17,17 @@ public class ResultsController {
     @Autowired
     private CertificationRepository certificationRepository;
 
+    @Autowired
+    private CourseRepository courseRepository;
+
     @GetMapping(value = {"results/{certId1}", "results/{certId1}/{certId2}", "results/{certId1}/{certId2}/{certId3}"})
     public String showResults(Model model,
                               @PathVariable Map<String, String> pathVarsMap) {
 
         List<Certification> chosenCertifications = new ArrayList<>();
         List<Course> requiredCourses = new ArrayList<>();
-        Map<String, List<Course> > userMap = new HashMap<>();
+        //Using a LinkedHashMap so that the semesters remain in chronological order
+        Map<String, List<Course> > userMap = new LinkedHashMap<>();
         List<Course> semester1 = new ArrayList<>();
         List<Course> semester2 = new ArrayList<>();
         List<Course> semester3 = new ArrayList<>();
@@ -41,52 +44,83 @@ public class ResultsController {
         userMap.put("Semester 6", semester6);
         userMap.put("Semester 7", semester7);
         userMap.put("Semester 8", semester8);
-        int pathVarsIndexCounter = 1;
 
         //Loop through programs the 1, 2, or 3 programs entered as path variables and add to ArrayList if present.
-        for (Map.Entry<String,String> entry : pathVarsMap.entrySet()) {
-            String certId = pathVarsMap.get("certId" + pathVarsIndexCounter);
+        for (String certId : pathVarsMap.values()) {
             if (certId != null) {
                 Integer certIdAsInt = Integer.valueOf(certId);
                 Optional<Certification> certOptional = certificationRepository.findById(certIdAsInt);
                 certOptional.ifPresent(chosenCertifications::add);
-                pathVarsIndexCounter++;
             }
         }
 
         //Adding the completed ArrayList of all certifications passed in as PathVariables
         model.addAttribute("certifications", chosenCertifications);
 
-        //Generating an ArrayList of all required courses
         for (Certification certification : chosenCertifications) {
+            //Adding university's GenEd requirements to ArrayList of all required courses
+            for (Course course : courseRepository.findAll()) {
+                if (course.getIsGeneralEducationRequirement() &&
+                        course.getUniversity().equals(certification.getUniversity()) &&
+                        !(requiredCourses.contains(course))) {
+                    requiredCourses.add(course);
+                }
+            }
+
+            //Adding each certification's requirements to ArrayList of all required courses
             requiredCourses.addAll(certification.getRequiredCourses());
+
         }
+
+        //Calculate total credit hours for Map
+        int totalCreditHours = 0;
+        for (Course course : requiredCourses) {totalCreditHours = totalCreditHours + course.getCreditHrs();}
+
+        //TODO: If total exceeds maximum total for university, send an error message and return to program selection
 
         for (Map.Entry<String, List<Course> > entry : userMap.entrySet()) {
             int semesterCreditHrs = 0;
+
             for (Course course : requiredCourses) {
-                List<Course> prerequisites = course.getPrerequisites();
-                boolean fulfilledAllPrereqs = true;
+                boolean hasFulfilledAllPrereqs = true;
+                boolean isAlreadyScheduled = false;
+                List<Object> coursesAlreadyScheduled = new ArrayList<>();
 
-                //Check to see if the semester's total credit hours already exceed the max credit hours for that university
-                if (semesterCreditHrs >= course.getUniversity().getMaxCreditsPerSemester()) {
-                    break;
-                }
+                String currentSemesterKey = entry.getKey();
+                List<String> keysList = new ArrayList<>(userMap.keySet());
+                Integer currentSemesterIndex = keysList.indexOf(currentSemesterKey);
+                List<List<Course>> valuesList = new ArrayList<>(userMap.values());
 
-                for (Course prereq : prerequisites) {
-                    //Check to see if the prereq exists in a past semester
-                    for (List<Course> accumulatedSemester : userMap.values()) {
-                        if (!(accumulatedSemester.contains(prereq))) {
-                            fulfilledAllPrereqs = false;
-                            break;
-                        } else {
-                            fulfilledAllPrereqs = true;
-                        }
+                for (int i=0; i < valuesList.size(); i++) {
+                    //if semester index is index of entry, skip
+                    if (!(currentSemesterIndex.equals(i))) {
+                        coursesAlreadyScheduled.addAll(valuesList.get(i));
                     }
                 }
-                if (fulfilledAllPrereqs) {
+
+                if (coursesAlreadyScheduled.contains(course)) {
+                    isAlreadyScheduled = true;
+                } else {
+                    isAlreadyScheduled = false;
+                }
+
+                List<Course> prerequisites = course.getPrerequisites();
+                //Check to see if each prereq exists in a past semester
+                for (Course prereq : prerequisites) {
+                    if (coursesAlreadyScheduled.contains(prereq)) {
+                        hasFulfilledAllPrereqs = true;
+                    } else {
+                        hasFulfilledAllPrereqs = false;
+                    }
+                }
+
+                if (!isAlreadyScheduled && hasFulfilledAllPrereqs) {
                     entry.getValue().add(course);
-                    semesterCreditHrs += course.getCreditHrs();
+                    semesterCreditHrs = semesterCreditHrs + course.getCreditHrs();
+                    //Check to see if the semester's new total credit hours exceed the amount
+                    // of the map's totalCreditHours divided by the amount of semesters,
+                    // so that it's more evenly distributed
+                    if (semesterCreditHrs > (totalCreditHours / userMap.size())) break;
                 }
             }
         }

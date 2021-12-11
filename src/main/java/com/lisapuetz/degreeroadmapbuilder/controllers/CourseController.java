@@ -47,8 +47,7 @@ public class CourseController {
     @PostMapping("add/{universityId}")
     public String processAddCourseForm(@ModelAttribute @Valid Course newCourse,
                                        Errors errors, Model model, @PathVariable int universityId,
-                                       @RequestParam List<Integer> prerequisites) {
-
+                                       @RequestParam(required = false) List<Integer> prerequisites) {
         if (errors.hasErrors()) {
             return "list";
         }
@@ -58,26 +57,15 @@ public class CourseController {
             return "list";
         }
 
-        List<Course> prereqObjects = (List<Course>) courseRepository.findAllById(prerequisites);
-        newCourse.setPrerequisites(prereqObjects);
-
         University university = universityOptional.get();
         newCourse.setUniversity(university);
 
-        courseRepository.save(newCourse);
-        return "redirect:";
-    }
-
-    @GetMapping("view/{courseId}")
-    public String displayViewCourse(Model model, @PathVariable int courseId) {
-
-        Optional optCourse = courseRepository.findById(courseId);
-        if (optCourse.isPresent()) {
-            Course course = (Course) optCourse.get();
-            model.addAttribute("course", course);
-            return "course/view";
-        } else {
-            return "redirect:../";
+        if (!(prerequisites == null)) {
+            List<Course> prereqObjects = (List<Course>) courseRepository.findAllById(prerequisites);
+            newCourse.setPrerequisites(prereqObjects);
         }
+
+        courseRepository.save(newCourse);
+        return "add/" + universityId;
     }
 }

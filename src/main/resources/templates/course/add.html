@@ -27,6 +27,12 @@
     </div>
 
     <div class="form-group">
+        <input type="checkbox" th:field="${course.isGeneralEducationRequirement}">
+        <label th:for="isGeneralEducationRequirement">General Education Requirement</label>
+        <span th:errors="${course.isGeneralEducationRequirement}" class="error"></span>
+    </div>
+
+    <div class="form-group">
         <label th:for="prerequisites">Prerequisites</label>
             <th:block th:each="course : ${university.getCourses()}">
                 <input type="checkbox" name="prerequisites" th:value="${course.id}">

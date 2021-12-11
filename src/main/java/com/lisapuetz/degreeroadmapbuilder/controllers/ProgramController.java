@@ -37,7 +37,6 @@ public class ProgramController {
         return "program/add";
     }
 
-    //change Request Param to Path Variable
     @PostMapping("add/{universityId}")
     public String processAddProgramForm(@ModelAttribute @Valid Program newProgram,
                                         Errors errors, Model model, @PathVariable int universityId) {
@@ -56,18 +55,5 @@ public class ProgramController {
 
         programRepository.save(newProgram);
         return "redirect:../list";
-    }
-
-    @GetMapping("view/{programId}")
-    public String displayViewProgram(Model model, @PathVariable int programId) {
-
-        Optional optProgram = programRepository.findById(programId);
-        if (optProgram.isPresent()) {
-            Program program = (Program) optProgram.get();
-            model.addAttribute("program", program);
-            return "program/view";
-        } else {
-            return "redirect:../";
-        }
     }
 }

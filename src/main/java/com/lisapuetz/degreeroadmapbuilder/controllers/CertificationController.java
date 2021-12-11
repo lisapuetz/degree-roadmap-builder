@@ -35,14 +35,8 @@ public class CertificationController {
         return "certification/index";
     }
 
-    @GetMapping("add/{universityId}/{programId}")
-    public String displayAddCertificationForm(Model model, @PathVariable int universityId,
-                                              @PathVariable int programId) {
-        Optional<University> universityOptional = universityRepository.findById(universityId);
-        if (universityOptional.isEmpty()) {
-            return "list";
-        }
-        University university = universityOptional.get();
+    @GetMapping("add/{programId}")
+    public String displayAddCertificationForm(Model model, @PathVariable int programId) {
 
         Optional<Program> programOptional = programRepository.findById(programId);
         if (programOptional.isEmpty()) {
@@ -50,35 +44,30 @@ public class CertificationController {
         }
         Program program = programOptional.get();
 
-        model.addAttribute("university", universityRepository.findById(universityId));
-        model.addAttribute("program", programRepository.findById(programId));
-        model.addAttribute("courses", university.getCourses());
+        model.addAttribute("university", program.getUniversity());
+        model.addAttribute("program", program);
         model.addAttribute(new Certification());
         return "certification/add";
     }
 
-    @PostMapping("add")
+    @PostMapping("add/{programId}")
     public String processAddCertificationForm(@ModelAttribute @Valid Certification newCertification,
-                                         Errors errors, Model model) {
-
+                                              Errors errors, Model model, @PathVariable int programId) {
         if (errors.hasErrors()) {
-            return "certification/add";
+            return "list";
         }
+
+        Optional<Program> programOptional = programRepository.findById(programId);
+        if (programOptional.isEmpty()) {
+            return "list";
+        }
+        Program program = programOptional.get();
+        newCertification.setProgram(program);
+
+        University university = program.getUniversity();
+        newCertification.setUniversity(university);
 
         certificationRepository.save(newCertification);
         return "redirect:";
-    }
-
-    @GetMapping("view/{certificationId}")
-    public String displayViewCertification(Model model, @PathVariable int certificationId) {
-
-        Optional optCert = certificationRepository.findById(certificationId);
-        if (optCert.isPresent()) {
-            Certification certification = (Certification) optCert.get();
-            model.addAttribute("certification", certification);
-            return "certification/view";
-        } else {
-            return "redirect:../";
-        }
     }
 }

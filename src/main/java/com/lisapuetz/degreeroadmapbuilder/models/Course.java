@@ -1,5 +1,7 @@
 package com.lisapuetz.degreeroadmapbuilder.models;
 
+import org.springframework.lang.Nullable;
+
 import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
@@ -13,6 +15,9 @@ public class Course extends AbstractEntity{
 
     private int creditHrs;
 
+    private Boolean isGeneralEducationRequirement = false;
+
+    @Nullable
     @ManyToMany
     private List<Course> prerequisites = new ArrayList<>();
 
@@ -51,5 +56,13 @@ public class Course extends AbstractEntity{
 
     public void setUniversity(University university) {
         this.university = university;
+    }
+
+    public Boolean getIsGeneralEducationRequirement() {
+        return isGeneralEducationRequirement;
+    }
+
+    public void setIsGeneralEducationRequirement(Boolean isGeneralEducationRequirement) {
+        this.isGeneralEducationRequirement = isGeneralEducationRequirement;
     }
 }

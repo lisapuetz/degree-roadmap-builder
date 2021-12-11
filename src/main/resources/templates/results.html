@@ -6,13 +6,15 @@
 <nav th:replace="fragments :: page-header"></nav>
 
 <h1>Your Map</h1>
-<h3 class="map-details-subhead" th:each="certification : ${chosenCertifications}" th:text="${certification.getName()} in ${certification.getProgram().getName()}">
+<th:block th:each="certification : ${chosenCertifications}">
+    <h3 class="map-details-subhead" th:text="${certification.getName()}" ></h3>
+</th:block>
 
-    <div th:each="semester : ${userMap}">
-        <h2 class="semester-heading" th:text="Semester"></h2>
-            <div th:each="course : semester">
-                <p class="course-listing" th:text="${course.name} ${course.title} ${course.creditHrs} credit hours"></p>
-            </div>
-    </div>
+    <th:block th:each="semester : ${userMap}">
+        <h2 class="semester-heading" th:text="${semester.getKey()}"></h2>
+            <th:block th:each="course : ${semester.getValue()}">
+                <p class="course-listing" th:text="${course.getName()}"></p>
+            </th:block>
+    </th:block>
 </body>
 </html>
