@@ -29,18 +29,12 @@ public class CertificationController {
     @Autowired
     private ProgramRepository programRepository;
 
-    @GetMapping("")
-    public String index(Model model) {
-        model.addAttribute("certifications", certificationRepository.findAll());
-        return "certification/index";
-    }
-
     @GetMapping("add/{programId}")
     public String displayAddCertificationForm(Model model, @PathVariable int programId) {
 
         Optional<Program> programOptional = programRepository.findById(programId);
         if (programOptional.isEmpty()) {
-            return "list";
+            return "add/{programId}";
         }
         Program program = programOptional.get();
 
@@ -54,12 +48,12 @@ public class CertificationController {
     public String processAddCertificationForm(@ModelAttribute @Valid Certification newCertification,
                                               Errors errors, Model model, @PathVariable int programId) {
         if (errors.hasErrors()) {
-            return "list";
+            return "add/{programId}";
         }
 
         Optional<Program> programOptional = programRepository.findById(programId);
         if (programOptional.isEmpty()) {
-            return "list";
+            return "add/{programId}";
         }
         Program program = programOptional.get();
         newCertification.setProgram(program);
@@ -68,6 +62,6 @@ public class CertificationController {
         newCertification.setUniversity(university);
 
         certificationRepository.save(newCertification);
-        return "redirect:";
+        return "redirect:../list/programs";
     }
 }

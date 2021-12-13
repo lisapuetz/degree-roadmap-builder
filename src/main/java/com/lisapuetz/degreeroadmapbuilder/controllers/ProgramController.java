@@ -54,6 +54,6 @@ public class ProgramController {
         newProgram.setUniversity(university);
 
         programRepository.save(newProgram);
-        return "redirect:../list";
+        return "redirect:../list/programs";
     }
 }

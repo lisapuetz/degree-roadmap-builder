@@ -24,12 +24,6 @@ public class CourseController {
     @Autowired
     private UniversityRepository universityRepository;
 
-    @GetMapping("")
-    public String index(Model model) {
-        model.addAttribute("courses", courseRepository.findAll());
-        return "course/index";
-    }
-
     @GetMapping("add/{universityId}")
     public String displayAddCourseForm(Model model, @PathVariable int universityId) {
 
@@ -49,12 +43,12 @@ public class CourseController {
                                        Errors errors, Model model, @PathVariable int universityId,
                                        @RequestParam(required = false) List<Integer> prerequisites) {
         if (errors.hasErrors()) {
-            return "list";
+            return "course/add/{universityId}";
         }
 
         Optional<University> universityOptional = universityRepository.findById(universityId);
         if (universityOptional.isEmpty()) {
-            return "list";
+            return "course/add/{universityId}";
         }
 
         University university = universityOptional.get();
@@ -66,6 +60,6 @@ public class CourseController {
         }
 
         courseRepository.save(newCourse);
-        return "add/" + universityId;
+        return "redirect:../list/courses";
     }
 }

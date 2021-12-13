@@ -37,66 +37,22 @@ public class ListController {
     @Autowired
     private UniversityRepository universityRepository;
 
-    @GetMapping("")
-    public String selectUniversity(Model model) {
-        model.addAttribute("title", "Select Your University");
+
+    @GetMapping("programs")
+    public String listPrograms(Model model) {
+        model.addAttribute("title", "Programs");
+
         model.addAttribute("universities", universityRepository.findAll());
-        return "list";
+        model.addAttribute("programs", programRepository.findAll());
+        return "list/programs";
     }
 
-    @PostMapping("")
-    public String processSelectUniversity(Errors errors, Model model,
-                                          @RequestParam int universityId) {
+    @GetMapping("courses")
+    public String listCourses(Model model) {
+        model.addAttribute("title", "Courses");
 
-        if (errors.hasErrors()) {
-            model.addAttribute("title", "Select Your University");
-            return "list";
-        }
-
-        Optional<University> universityOptional = universityRepository.findById(universityId);
-        if (universityOptional.isEmpty()) {
-            model.addAttribute("title", "Select Your University");
-            return "list";
-        }
-
-        University university = universityOptional.get();
-
-        return "redirect:/list/programs/" + universityId;
-    }
-
-    @GetMapping("programs/{universityId}")
-    public String listPrograms(Model model, @PathVariable int universityId) {
-        model.addAttribute("title", universityRepository.findById(universityId) + " Programs");
-
-        List<Program> existingPrograms = new ArrayList<>();
-
-        Iterable<Program> programs = programRepository.findAll();
-        for (Program program : programs) {
-            int programUniId = program.getUniversity().getId();
-            if (programUniId == universityId) {
-                existingPrograms.add(program);
-            }
-        }
-
-        model.addAttribute("programs", existingPrograms);
-        return "programs";
-    }
-
-    @GetMapping("courses/{universityId}")
-    public String listCourses(Model model, @PathVariable int universityId) {
-        model.addAttribute("title", universityRepository.findById(universityId) + " Courses");
-
-        List<Course> existingCourses = new ArrayList<>();
-
-        Iterable<Course> courses = courseRepository.findAll();
-        for (Course course : courses) {
-            int courseUniId = course.getUniversity().getId();
-            if (courseUniId == universityId) {
-                existingCourses.add(course);
-            }
-        }
-
-        model.addAttribute("courses", existingCourses);
-        return "courses";
+        model.addAttribute("universities", universityRepository.findAll());
+        model.addAttribute("courses", courseRepository.findAll());
+        return "list/courses";
     }
 }
